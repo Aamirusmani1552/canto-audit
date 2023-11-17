@@ -133,6 +133,7 @@ contract asDFactory is Test {
         asdToken.approve(address(asdToken), burnAmount);
 
         // calling this will burn more than the actual token that got minted because of alice's mint due to exchange rate
+        // NOTE the burn amount shown is just a simulated value. The actual burn amount will be different. This is just for testing. For implementing this burn function nothing was changed in the asD contract expect some logging
         asdToken.burn(burnAmount);
         vm.stopPrank();
 
