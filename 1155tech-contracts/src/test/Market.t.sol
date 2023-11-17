@@ -6,11 +6,7 @@ import "../bonding_curve/LinearBondingCurve.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockERC20 is ERC20 {
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint256 initialSupply
-    ) ERC20(name, symbol) {
+    constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
         _mint(msg.sender, initialSupply);
     }
 }
@@ -39,6 +35,7 @@ contract MarketTest is Test {
         assertFalse(market.whitelistedBondingCurves(address(bondingCurve)));
     }
 
+    // @audit active todos
     function testFailChangeBondingCurveAllowedNonOwner() public {
         // TODO: For some reason, assertion fails, but call reverts as expected
         // vm.expectRevert("Ownable: caller is not the owner");
@@ -102,6 +99,10 @@ contract MarketTest is Test {
         assertEq(token.balanceOf(address(market)), LINEAR_INCREASE + 3 * fee - (fee * 33) / 100);
     }
 
+    function test_ContractOwnerIsNotSet() public {
+        assertEq(market.owner(), address(this));
+    }
+
     function claimCreatorFeeNonCreator() public {
         testCreateNewShare();
         vm.expectRevert("Not creator");
@@ -125,23 +126,15 @@ contract MarketTest is Test {
         assertEq(token.balanceOf(address(this)), balBefore + (fee * 67) / 100);
     }
 
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure returns (bytes4) {
         return this.onERC1155Received.selector;
     }
 
-    function onERC1155BatchReceived(
-        address,
-        address,
-        uint256[] calldata,
-        uint256[] calldata,
-        bytes calldata
-    ) external pure returns (bytes4) {
+    function onERC1155BatchReceived(address, address, uint256[] calldata, uint256[] calldata, bytes calldata)
+        external
+        pure
+        returns (bytes4)
+    {
         return this.onERC1155BatchReceived.selector;
     }
 }

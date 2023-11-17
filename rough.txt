@@ -1,0 +1,21 @@
+// @audit points to keep in mind during audit
+
+- $NOTE is backed by $USDC and $USDT, and $USYC
+- For every $NOTE in circulation, there is more than 1 USD worth of collateral held by the CLM
+- Transfer is an ERC-20 method that allows accounts to send tokens to other Ethereum addresses. A cToken transfer will fail if the account has entered that cToken market and the transfer would have put the account into a state of negative liquidity.
+
+
+
+/////////////////////////////////
+////// scratch paper ////////////
+/////////////////////////////////
+
+exchangeRateCurrent = 1.1e28
+amount: ??
+
+90909090909090909090 = (amount * 1e28) / exchangeRateCurrent
+90909090909090909090 * exchangeRateCurrent = amount * 1e28
+90909090909090909090 * exchangeRateCurrent / 1e28 = amount
+90909090909090909090 * 1.1e28 / 1e28 = amount
+90909090909090909090 * 11000000000000000000000000000 / 10000000000000000000000000000 = amount
+

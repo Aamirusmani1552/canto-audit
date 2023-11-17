@@ -5,6 +5,7 @@ import {Turnstile} from "../interface/Turnstile.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {asD} from "./asD.sol";
 
+// @audit should overrid `renounceOwnership` in case it is called by the owner mistakenly. Because then it will be impossible to transfer ownership
 contract asDFactory is Ownable2Step {
     /*//////////////////////////////////////////////////////////////
                                  STATE
@@ -26,6 +27,8 @@ contract asDFactory is Ownable2Step {
         if (block.chainid == 7700 || block.chainid == 7701) {
             // Register CSR on Canto main- and testnet
             Turnstile turnstile = Turnstile(0xEcf044C5B4b867CFda001101c617eCd347095B44);
+            // @audit does registring tx.origin which will be the EOA that deployed the contract make sense? will the rewards be accrueed and will the rewards be able to withdraw?
+            // https://docs.canto.io/evm-development/contract-secured-revenue#registering-a-contract
             turnstile.register(tx.origin);
         }
     }

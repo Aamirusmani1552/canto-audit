@@ -79,8 +79,7 @@ contract Market is ERC1155, Ownable2Step {
 
     modifier onlyShareCreator() {
         require(
-            !shareCreationRestricted || whitelistedShareCreators[msg.sender] || msg.sender == owner(),
-            "Not allowed"
+            !shareCreationRestricted || whitelistedShareCreators[msg.sender] || msg.sender == owner(), "Not allowed"
         );
         _;
     }
@@ -88,7 +87,9 @@ contract Market is ERC1155, Ownable2Step {
     /// @notice Initiates CSR on main- and testnet
     /// @param _uri ERC1155 Base URI
     /// @param _paymentToken Address of the payment token
-    constructor(string memory _uri, address _paymentToken) ERC1155(_uri) Ownable() {
+
+    // @audit can we call this from the constructor `Ownable()`?
+    constructor(string memory _uri, address _paymentToken) ERC1155(_uri) Ownable {
         token = IERC20(_paymentToken);
         if (block.chainid == 7700 || block.chainid == 7701) {
             // Register CSR on Canto main- and testnet
@@ -111,11 +112,11 @@ contract Market is ERC1155, Ownable2Step {
     /// @param _shareName Name of the share
     /// @param _bondingCurve Address of the bonding curve, has to be whitelisted
     /// @param _metadataURI URI of the metadata
-    function createNewShare(
-        string memory _shareName,
-        address _bondingCurve,
-        string memory _metadataURI
-    ) external onlyShareCreator returns (uint256 id) {
+    function createNewShare(string memory _shareName, address _bondingCurve, string memory _metadataURI)
+        external
+        onlyShareCreator
+        returns (uint256 id)
+    {
         require(whitelistedBondingCurves[_bondingCurve], "Bonding curve not whitelisted");
         require(shareIDs[_shareName] == 0, "Share already exists");
         id = ++shareCount;
@@ -193,7 +194,7 @@ contract Market is ERC1155, Ownable2Step {
     /// @param _amount The number of NFTs to mint.
     function getNFTMintingPrice(uint256 _id, uint256 _amount) public view returns (uint256 fee) {
         address bondingCurve = shareData[_id].bondingCurve;
-        (uint256 priceForOne, ) = IBondingCurve(bondingCurve).getPriceAndFee(shareData[_id].tokenCount, 1);
+        (uint256 priceForOne,) = IBondingCurve(bondingCurve).getPriceAndFee(shareData[_id].tokenCount, 1);
         fee = (priceForOne * _amount * NFT_FEE_BPS) / 10_000;
     }
 
@@ -271,17 +272,13 @@ contract Market is ERC1155, Ownable2Step {
 
     function _getRewardsSinceLastClaim(uint256 _id) internal view returns (uint256 amount) {
         uint256 lastClaimedValue = rewardsLastClaimedValue[_id][msg.sender];
-        amount =
-            ((shareData[_id].shareHolderRewardsPerTokenScaled - lastClaimedValue) * tokensByAddress[_id][msg.sender]) /
-            1e18;
+        amount = (
+            (shareData[_id].shareHolderRewardsPerTokenScaled - lastClaimedValue) * tokensByAddress[_id][msg.sender]
+        ) / 1e18;
     }
 
     /// @notice Splits the fee among the share holder, creator and platform
-    function _splitFees(
-        uint256 _id,
-        uint256 _fee,
-        uint256 _tokenCount
-    ) internal {
+    function _splitFees(uint256 _id, uint256 _fee, uint256 _tokenCount) internal {
         uint256 shareHolderFee = (_fee * HOLDER_CUT_BPS) / 10_000;
         uint256 shareCreatorFee = (_fee * CREATOR_CUT_BPS) / 10_000;
         uint256 platformFee = _fee - shareHolderFee - shareCreatorFee;

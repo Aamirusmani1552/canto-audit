@@ -24,6 +24,7 @@ contract LinearBondingCurve is IBondingCurve {
         }
     }
 
+    // @audit does this calculation always hold?
     function getFee(uint256 shareCount) public pure override returns (uint256) {
         uint256 divisor;
         if (shareCount > 1) {
